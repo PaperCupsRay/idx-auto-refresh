@@ -48,7 +48,7 @@ function SendMessageToTG(msg) {
         console.log("未设置TG通知参数");
         return;
     }
-    let url = "https://api-proxy.6528056.xyz/https://api.telegram.org/bot" + BotToken + "/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
+    let url = "https://api.telegram.org/bot" + BotToken + "/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
     GM_xmlhttpRequest({
         method: "POST",
         url: url,
