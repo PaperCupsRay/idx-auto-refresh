@@ -4,10 +4,11 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  当指定元素出现时自动刷新页面
-// @author       PaperCupsRay
+// @author       YourName
 // @match        https://idx.google.com/*
 // @match        https://*.cloudworkstations.dev/*
-// @grant        none
+// @grant        GM_xmlhttpRequest
+// @connect      *
 // ==/UserScript==
 
 // 手动实现字符串补零
@@ -40,9 +41,30 @@ function getUrlParamsFromUrl(urlStr) {
     return params;
 }
 
-// 定义一个函数来获取 XPath 表达式对应的元素
-function getElementByXpath(path, doc) {
-    return doc.evaluate(path, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+function SendMessageToTG(msg) {
+    let BotToken = ''; //可以为空，或者@BotFather中输入/start，/newbot，并关注机器人
+    let ChatID = ''; //可以为空，或者@userinfobot中获取，/start
+    if(BotToken == "" || ChatID  == "") {
+        console.log("未设置TG通知参数");
+        return;
+    }
+    let url = "https://api-proxy.6528056.xyz/https://api.telegram.org/bot" + BotToken + "/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
+    GM_xmlhttpRequest({
+        method: "POST",
+        url: url,
+        headers: {
+            'Accept': 'text/html,application/xhtml+xml,application/xml;',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'User-Agent': 'Mozilla/5.0 Chrome/90.0.4430.72'
+        },
+        onload: function(response){
+            console.log("请求成功");
+            console.log(response.responseText);
+        },
+        onerror: function(response){
+            console.log("请求失败",response);
+        }
+    });
 }
 
 (function () {
@@ -74,6 +96,8 @@ function getElementByXpath(path, doc) {
     } else {
         const url_p = getUrlParamsFromUrl(location.href);
         if (url_p.folder != null) {
+            let machine = url_p.folder.split("/")[3];
+            SendMessageToTG(`idx-${machine}上线`);
             window.top.postMessage({
                 myMessage: {
                     command: "loaded"
@@ -84,7 +108,8 @@ function getElementByXpath(path, doc) {
             const checkID = setInterval(() => {
                 pop = document.getElementById("monaco-dialog-message-detail")
                 if (pop != null) {
-                    console.log("3秒后刷新")
+                    console.log("3秒后刷新");
+                    SendMessageToTG(`idx-${machine}掉线，3秒后刷新网页`);
                     clearInterval(checkID);
                     setTimeout(() => {
                         window.top.postMessage({
